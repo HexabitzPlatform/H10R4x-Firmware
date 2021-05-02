@@ -1,0 +1,5 @@
+H10R4_gpio.c:66:6:IND_LED_Init	32	static
+H10R4_gpio.c:52:6:GPIO_Init	32	static
+H10R4_gpio.c:78:6:MX_GPIO_Init	48	static
+H10R4_gpio.c:167:12:GetPortGPIOs	24	static
+H10R4_gpio.c:113:9:IsFactoryReset	88	static
