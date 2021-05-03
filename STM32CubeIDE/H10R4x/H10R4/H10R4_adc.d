@@ -1,7 +1,6 @@
-H10R4/H10R4_adc.o: \
- D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/H10R4/H10R4_adc.c \
- D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/H10R4/H10R4_adc.h \
- ../../BOS/BOS.h ../../BOS/BOS_MsgCodes.h \
+H10R4/H10R4_adc.o: W:/Hexabitz/H10R4x-Firmware/H10R4/H10R4_adc.c \
+ W:/Hexabitz/H10R4x-Firmware/H10R4/H10R4_adc.h ../../BOS/BOS.h \
+ ../../BOS/BOS_MsgCodes.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h \
@@ -60,7 +59,7 @@ H10R4/H10R4_adc.o: \
  ../../H10R4/H10R4_gpio.h ../../H10R4/H10R4_dma.h ../../H10R4/H10R4_adc.h \
  ../../BOS/BOS_DMA.h
 
-D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/H10R4/H10R4_adc.h:
+W:/Hexabitz/H10R4x-Firmware/H10R4/H10R4_adc.h:
 
 ../../BOS/BOS.h:
 

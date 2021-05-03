@@ -15,7 +15,7 @@ H10R4.c:765:13:CheckForEnterKey	16	static
 H10R4.c:593:22:SendMeasurementResult	64	static
 H10R4.c:477:6:JoystickTimerCallback	8	static
 H10R4.c:167:6:SystemClock_Config	128	static
-H10R4.c:217:9:SaveToRO	48	static
+H10R4.c:217:9:SaveToRO	64	static
 H10R4.c:314:9:ClearROtopology	8	static
 H10R4.c:325:6:Module_Init	24	static
 H10R4.c:448:6:RegisterModuleCLICommands	8	static
@@ -31,5 +31,5 @@ H10R4.c:1056:15:Stream_To_CLI_R	16	static
 H10R4.c:1079:15:Stream_To_Port	16	static
 H10R4.c:1103:15:Stream_To_Buffer	16	static
 H10R4.c:1127:15:Stream_To_Cbuffer	16	static
-H10R4.c:1220:22:joystickStreamCommand	80	static,ignoring_inline_asm
+H10R4.c:1220:22:joystickStreamCommand	72	static,ignoring_inline_asm
 H10R4.c:354:15:Module_MessagingTask	24	static

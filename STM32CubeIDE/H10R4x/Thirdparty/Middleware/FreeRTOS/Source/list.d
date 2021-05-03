@@ -1,5 +1,5 @@
 Thirdparty/Middleware/FreeRTOS/Source/list.o: \
- D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/Thirdparty/Middleware/FreeRTOS/Source/list.c \
+ W:/Hexabitz/H10R4x-Firmware/Thirdparty/Middleware/FreeRTOS/Source/list.c \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS.h \
  ../../BOS/FreeRTOSConfig.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/projdefs.h \
