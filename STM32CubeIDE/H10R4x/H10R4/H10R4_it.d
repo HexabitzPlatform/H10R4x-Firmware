@@ -1,4 +1,4 @@
-H10R4/H10R4_it.o: W:/Current\ work/DTest/H10R4x-Firmware/H10R4/H10R4_it.c \
+H10R4/H10R4_it.o: W:/Hexabitz/H10R4x-Firmware/H10R4/H10R4_it.c \
  ../../BOS/BOS.h ../../BOS/BOS_MsgCodes.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \
@@ -33,7 +33,6 @@ H10R4/H10R4_it.o: W:/Current\ work/DTest/H10R4x-Firmware/H10R4/H10R4_it.c \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim_ex.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h \
- ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h \
  ../../User/project.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS.h \
@@ -128,8 +127,6 @@ H10R4/H10R4_it.o: W:/Current\ work/DTest/H10R4x-Firmware/H10R4/H10R4_it.c \
 ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h:
 
 ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h:
-
-../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h:
 
 ../../User/project.h:
 

@@ -1,8 +1,7 @@
-BOS/BOS_messaging.o: \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_messaging.c \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_messaging.h \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS.h \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_MsgCodes.h \
+BOS/BOS_messaging.o: W:/Hexabitz/H10R4x-Firmware/BOS/BOS_messaging.c \
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS_messaging.h \
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS.h \
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS_MsgCodes.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h \
@@ -36,7 +35,6 @@ BOS/BOS_messaging.o: \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_tim_ex.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h \
- ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h \
  ../../User/project.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS.h \
@@ -56,18 +54,17 @@ BOS/BOS_messaging.o: \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/event_groups.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/timers.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS_CLI.h \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_eeprom.h \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_utils.h \
- ../../H10R4/H10R4.h ../../BOS/BOS.h ../../H10R4/H10R4_MemoryMap.h \
- ../../H10R4/H10R4_uart.h ../../H10R4/H10R4_gpio.h \
- ../../H10R4/H10R4_dma.h ../../H10R4/H10R4_adc.h \
- W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_DMA.h
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS_eeprom.h \
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS_utils.h ../../H10R4/H10R4.h \
+ ../../BOS/BOS.h ../../H10R4/H10R4_MemoryMap.h ../../H10R4/H10R4_uart.h \
+ ../../H10R4/H10R4_gpio.h ../../H10R4/H10R4_dma.h ../../H10R4/H10R4_adc.h \
+ W:/Hexabitz/H10R4x-Firmware/BOS/BOS_DMA.h
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_messaging.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS_messaging.h:
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS.h:
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_MsgCodes.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS_MsgCodes.h:
 
 ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h:
 
@@ -135,8 +132,6 @@ W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_MsgCodes.h:
 
 ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_uart_ex.h:
 
-../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_def.h:
-
 ../../User/project.h:
 
 ../../Thirdparty/Middleware/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h:
@@ -175,9 +170,9 @@ W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_MsgCodes.h:
 
 ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS_CLI.h:
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_eeprom.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS_eeprom.h:
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_utils.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS_utils.h:
 
 ../../H10R4/H10R4.h:
 
@@ -193,4 +188,4 @@ W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_utils.h:
 
 ../../H10R4/H10R4_adc.h:
 
-W:/Current\ work/DTest/H10R4x-Firmware/BOS/BOS_DMA.h:
+W:/Hexabitz/H10R4x-Firmware/BOS/BOS_DMA.h:

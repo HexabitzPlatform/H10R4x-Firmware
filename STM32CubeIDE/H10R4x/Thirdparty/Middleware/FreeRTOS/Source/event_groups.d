@@ -1,5 +1,5 @@
 Thirdparty/Middleware/FreeRTOS/Source/event_groups.o: \
- W:/Current\ work/DTest/H10R4x-Firmware/Thirdparty/Middleware/FreeRTOS/Source/event_groups.c \
+ W:/Hexabitz/H10R4x-Firmware/Thirdparty/Middleware/FreeRTOS/Source/event_groups.c \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS.h \
  ../../BOS/FreeRTOSConfig.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/projdefs.h \

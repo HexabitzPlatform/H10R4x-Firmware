@@ -1,5 +1,5 @@
 Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.o: \
- W:/Current\ work/DTest/H10R4x-Firmware/Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
+ W:/Hexabitz/H10R4x-Firmware/Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h \

@@ -1,5 +1,5 @@
 Thirdparty/Middleware/FreeRTOS/Source/portable/MemMang/heap_4.o: \
- W:/Current\ work/DTest/H10R4x-Firmware/Thirdparty/Middleware/FreeRTOS/Source/portable/MemMang/heap_4.c \
+ W:/Hexabitz/H10R4x-Firmware/Thirdparty/Middleware/FreeRTOS/Source/portable/MemMang/heap_4.c \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/FreeRTOS.h \
  ../../BOS/FreeRTOSConfig.h \
  ../../Thirdparty/Middleware/FreeRTOS/Source/include/projdefs.h \
