@@ -1,4 +1,0 @@
-H10R4_timers.c:54:6:TIM_USEC_Init	32	static
-H10R4_timers.c:81:6:TIM_MSEC_Init	32	static
-H10R4_timers.c:106:6:StartMicroDelay	8	static
-H10R4_timers.c:126:6:StartMilliDelay	8	static
