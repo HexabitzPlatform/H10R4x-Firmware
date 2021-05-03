@@ -1,3 +1,6 @@
 [submodule "Thirdparty"]
 	path = Thirdparty
 	url = https://github.com/hexabitzplatform/Thirdparty
+[submodule "BOS"]
+	path = BOS
+	url = https://github.com/HexabitzPlatform/BOS
