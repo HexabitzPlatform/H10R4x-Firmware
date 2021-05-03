@@ -1,5 +1,5 @@
 Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.o: \
- W:/Hexabitz/H10R4x-Firmware/Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c \
+ D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/Thirdparty/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_rcc.h \

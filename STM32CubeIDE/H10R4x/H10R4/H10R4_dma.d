@@ -1,4 +1,5 @@
-H10R4/H10R4_dma.o: W:/Hexabitz/H10R4x-Firmware/H10R4/H10R4_dma.c \
+H10R4/H10R4_dma.o: \
+ D:/Hexabitz/for\ Release/Modules\ firmware/H10R4x/H10R4/H10R4_dma.c \
  ../../BOS/BOS.h ../../BOS/BOS_MsgCodes.h \
  ../../Thirdparty/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h \
  ../../H10R4/stm32f0xx_hal_conf.h \

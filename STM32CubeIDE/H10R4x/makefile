@@ -1,6 +1,5 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
 ################################################################################
 
 -include ../makefile.init
@@ -35,12 +34,6 @@ endif
 
 -include ../makefile.defs
 
-OPTIONAL_TOOL_DEPS := \
-$(wildcard ../makefile.defs) \
-$(wildcard ../makefile.init) \
-$(wildcard ../makefile.targets) \
-
-
 BUILD_ARTIFACT_NAME := H10R4x
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX := 
@@ -70,27 +63,27 @@ all: main-build
 main-build: H10R4x.elf secondary-outputs
 
 # Tool invocations
-H10R4x.elf: $(OBJS) $(USER_OBJS) W:\Hexabitz\H10R4x-Firmware\STM32CubeIDE\STM32F091RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "H10R4x.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"W:\Hexabitz\H10R4x-Firmware\STM32CubeIDE\STM32F091RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H10R4x.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+H10R4x.elf: $(OBJS) $(USER_OBJS) D:\Hexabitz\for\ Release\Modules\ firmware\H10R4x\STM32CubeIDE\STM32F091RCTX_FLASH.ld
+	arm-none-eabi-gcc -o "H10R4x.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"D:\Hexabitz\for Release\Modules firmware\H10R4x\STM32CubeIDE\STM32F091RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H10R4x.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+default.size.stdout: $(EXECUTABLES)
 	arm-none-eabi-size  $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H10R4x.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+H10R4x.list: $(EXECUTABLES)
 	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "H10R4x.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H10R4x.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+H10R4x.hex: $(EXECUTABLES)
 	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "H10R4x.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H10R4x.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+H10R4x.bin: $(EXECUTABLES)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H10R4x.bin"
 	@echo 'Finished building: $@'
 	@echo ' '

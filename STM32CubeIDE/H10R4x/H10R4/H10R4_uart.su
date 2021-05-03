@@ -3,10 +3,10 @@ H10R4_uart.c:73:6:MX_USART2_UART_Init	8	static
 H10R4_uart.c:95:6:MX_USART3_UART_Init	8	static
 H10R4_uart.c:140:6:MX_USART5_UART_Init	8	static
 H10R4_uart.c:162:6:MX_USART6_UART_Init	8	static
-H10R4_uart.c:182:6:HAL_UART_MspInit	72	static
+H10R4_uart.c:182:6:HAL_UART_MspInit	64	static
 H10R4_uart.c:445:21:GetUart	0	static
-H10R4_uart.c:339:19:readPxMutex	24	static
-H10R4_uart.c:360:19:writePxMutex	24	static
+H10R4_uart.c:339:19:readPxMutex	32	static
+H10R4_uart.c:360:19:writePxMutex	32	static
 H10R4_uart.c:381:19:readPxITMutex	32	static
 H10R4_uart.c:397:19:writePxITMutex	32	static
 H10R4_uart.c:413:19:writePxDMAMutex	32	static

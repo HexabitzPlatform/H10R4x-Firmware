@@ -17,4 +17,4 @@ stm32f0xx_hal_rtc.c:874:19:HAL_RTC_SetAlarm_IT	24	static
 stm32f0xx_hal_rtc.c:1338:9:RTC_Bcd2ToByte	0	static
 stm32f0xx_hal_rtc.c:520:19:HAL_RTC_GetTime	24	static
 stm32f0xx_hal_rtc.c:672:19:HAL_RTC_GetDate	16	static
-stm32f0xx_hal_rtc.c:1083:19:HAL_RTC_GetAlarm	32	static
+stm32f0xx_hal_rtc.c:1083:19:HAL_RTC_GetAlarm	24	static

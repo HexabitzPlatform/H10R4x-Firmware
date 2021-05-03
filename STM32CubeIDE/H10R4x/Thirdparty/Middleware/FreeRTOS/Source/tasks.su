@@ -23,11 +23,11 @@ tasks.c:1778:12:xTaskGetTickCountFromISR	0	static
 tasks.c:1809:13:uxTaskGetNumberOfTasks	0	static
 tasks.c:1938:12:xTaskIncrementTick	24	static,ignoring_inline_asm
 tasks.c:1670:12:xTaskResumeAll	16	static,ignoring_inline_asm
-tasks.c:922:7:vTaskDelay	8	static,ignoring_inline_asm
+tasks.c:922:7:vTaskDelay	16	static,ignoring_inline_asm
 tasks.c:3001:13:prvCheckTasksWaitingTermination	8	static
 tasks.c:2658:8:prvIdleTask	8	static
 tasks.c:1834:14:uxTaskGetSystemState	24	static
-tasks.c:2202:6:vTaskSwitchContext	8	static,ignoring_inline_asm
+tasks.c:2202:6:vTaskSwitchContext	16	static,ignoring_inline_asm
 tasks.c:1284:7:vTaskSuspend	16	static,ignoring_inline_asm
 tasks.c:2262:6:vTaskPlaceOnEventList	16	static,ignoring_inline_asm
 tasks.c:2321:6:vTaskPlaceOnUnorderedEventList	16	static,ignoring_inline_asm
@@ -45,11 +45,11 @@ tasks.c:3361:13:xTaskGetSchedulerState	0	static
 tasks.c:3389:7:vTaskPriorityInherit	16	static
 tasks.c:3455:13:xTaskPriorityDisinherit	16	static,ignoring_inline_asm
 tasks.c:3626:7:vTaskList	32	static
-tasks.c:3718:7:vTaskGetRunTimeStats	48	static
+tasks.c:3718:7:vTaskGetRunTimeStats	32	static
 tasks.c:3840:12:uxTaskResetEventItemValue	0	static
 tasks.c:3856:8:pvTaskIncrementMutexHeldCount	0	static
 tasks.c:3873:11:ulTaskNotifyTake	16	static
 tasks.c:3983:13:xTaskNotifyWait	24	static
 tasks.c:4104:13:xTaskGenericNotify	24	static,ignoring_inline_asm
-tasks.c:4193:13:xTaskNotifyFromISR	24	static,ignoring_inline_asm
+tasks.c:4193:13:xTaskNotifyFromISR	32	static,ignoring_inline_asm
 tasks.c:4305:7:vTaskNotifyGiveFromISR	24	static,ignoring_inline_asm
