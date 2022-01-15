@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
+ BitzOS (BOS) V0.2.6 - Copyright (C) 2017-2022 Hexabitz
  All rights reserved
 
  File Name     : H10R4.c
@@ -37,11 +37,12 @@ float H10R4_y = 0;
 bool H10R4_STREAM_TYPE = 0;
 
 uint8_t startMeasurement = STOP_MEASUREMENT;
-module_param_t modParam[NUM_MODULE_PARAMS] = { { .paramPtr = &H10R4_variant,
-		.paramFormat = FMT_INT8, .paramName = "variant" }, { .paramPtr =
-		&H10R4_x, .paramFormat = FMT_FLOAT, .paramName = "x" }, { .paramPtr =
-		&H10R4_y, .paramFormat = FMT_FLOAT, .paramName = "y" }, { .paramPtr =
-				&H10R4_STREAM_TYPE, .paramFormat = FMT_BOOL, .paramName = "streamType" } };
+module_param_t modParam[NUM_MODULE_PARAMS] =
+		{ { .paramPtr = &H10R4_variant, .paramFormat = FMT_INT8, .paramName =
+				"variant" }, { .paramPtr = &H10R4_x, .paramFormat = FMT_FLOAT,
+				.paramName = "x" }, { .paramPtr = &H10R4_y, .paramFormat =
+				FMT_FLOAT, .paramName = "y" }, { .paramPtr = &H10R4_STREAM_TYPE,
+				.paramFormat = FMT_BOOL, .paramName = "streamType" } };
 
 /* Private variables ---------------------------------------------------------*/
 Stream_type_t type;
@@ -49,14 +50,21 @@ Stream_options_t option;
 TimerHandle_t xTimerJoystick = NULL;
 TaskHandle_t JoystickHandle = NULL;
 volatile Joystick_state_t joystickState;
+volatile Joystick_state_t joystickMyState;
 volatile uint32_t vector[2];
 volatile uint8_t joystickMode;
 volatile float x, y;
 volatile float Right, Left, right, left;
-int buf = 0;
-int *ptrBuf = &buf;
+int bufx = 0;
+int bufy = 0;
+int value_fixedX = 0;
+int value_fixedY = 0;
+int *ptrBufx = &bufx;
+int *ptrBufy = &bufy;
+int *ptrvaluefixedx = &value_fixedX;
+int *ptrvaluefixedy = &value_fixedY;
 int joystickMaxInterval = 0;
-uint8_t joystickPort, joystickModule, v;
+uint8_t joystickPort, joystickModule, vx,vy;
 uint8_t stream_index = 0;
 uint32_t joystickPeriod, joystickTimeout;
 float Cbuf1 = 0, Cbuf2 = 0;
@@ -65,7 +73,14 @@ bool joystickVector;
 bool stopB = 0;
 bool variantB = 0;
 bool buttonB = 0;
-
+volatile uint32_t vector_old[2] = { 0 };
+int value_fixedx =0 , fx;
+int value_fixedy =0 , fy;
+int32_t diff0;
+int32_t diff1;
+int buffer_value_lock;
+int joystickbuffer_value_lock;
+uint32_t vectorr=0;
 /* Private function prototypes -----------------------------------------------*/
 TIM_HandleTypeDef htim3;
 void JoystickTimerCallback(TimerHandle_t xTimerSwitch);
@@ -77,9 +92,13 @@ static void ADC_Select_CH9(void);
 static void ADC_Deselect_CH8(void);
 static void ADC_Deselect_CH9(void);
 static int Get_Direction(void);
+static int Get_Direction4(void);
 static void joystickStopMeasurement(void);
 static void cartesianCoordinates(void);
-static int calculateVariantValue(bool vector, int maxInterval);
+static int calculateVariantValuex(bool vector, int maxInterval,
+		int buffer_value_lock);
+static int calculateVariantValuey(bool vector, int maxInterval,
+		int buffer_value_lock);
 static void CheckForEnterKey(void);
 static Module_Status SendMeasurementResult(uint8_t request, uint8_t int_value,
 		float fXValue, float fYValue, uint8_t module, uint8_t port,
@@ -90,7 +109,13 @@ static portBASE_TYPE demoCommand(int8_t *pcWriteBuffer, size_t xWriteBufferLen,
 		const int8_t *pcCommandString);
 static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 		size_t xWriteBufferLen, const int8_t *pcCommandString);
-static portBASE_TYPE variantModParamCommand(int8_t *pcWriteBuffer,
+static portBASE_TYPE variantxModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString);
+static portBASE_TYPE variantyModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString);
+static portBASE_TYPE valuefixedxModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString);
+static portBASE_TYPE valuefixedyModParamCommand(int8_t *pcWriteBuffer,
 		size_t xWriteBufferLen, const int8_t *pcCommandString);
 static portBASE_TYPE xModParamCommand(int8_t *pcWriteBuffer,
 		size_t xWriteBufferLen, const int8_t *pcCommandString);
@@ -113,16 +138,40 @@ const CLI_Command_Definition_t demoCommandDefinition =
 /* CLI command structure : stream */
 const CLI_Command_Definition_t joystickStreamCommandDefinition =
 		{ (const int8_t*) "stream", /* The command string to type. */
-				(const int8_t*) "stream:\r\nUse the stream command as follows:\n\r  >stream <Type_of_stream> <Where_to_stream> <period>(in ms) <Timeout>(in ms) <ParamA> <ParamB>\n\rType_of_streams:\n\r  -d\tDirection.\n\r  -c\tCarteisan. \n\rWhere_to_stream:\r\n  cli\t Outputs results on CLI.\r\n  raw\t Outputs RAW data.\r\n  port\t Outputs from Ports  ParamA:<P1..Px>  ParamB:<ModuleNum>.\n\r  variant\tStores values in a buffer accessed from the command: variant (Use with Direction stream)  ParamA:<Vector> (Y-axis=0, X-axis=1)  ParamB:<Max_Interval>.\n\r  buffer\tStores values in a buffer accessed from the commands: x and y (Use with Cartesian stream).\n\r\n\r",
+				(const int8_t*) "stream:\r\nUse the stream command as follows:\n\r  >stream <Type_of_stream> <Where_to_stream> <period>(in ms) <Timeout>(in ms) <ParamA> <ParamB>\n\rType_of_streams:\n\r  -d\tDirection.\n\r  -c\tCarteisan. \n\rWhere_to_stream:\r\n  cli\t Outputs results on CLI.\r\n  raw\t Outputs RAW data.\r\n  port\t Outputs from Ports  ParamA:<P1..Px>  ParamB:<ModuleNum>.\n\r  variant\tStores values in a buffer accessed from the command: variant (Use with Direction stream)  ParamA:<Vector> (X-axis=0, Y-axis=1)  ParamB:<Max_Interval>.\n\r  buffer\tStores values in a buffer accessed from the commands: x and y (Use with Cartesian stream).\n\r\n\r",
 				joystickStreamCommand, /* The function to run. */
 				-1 /* Multiple parameters are expected. */
 		};
 /*-----------------------------------------------------------*/
-/* CLI command structure : variant */
-const CLI_Command_Definition_t variantModParamCommandDefinition =
+/* CLI command structure : variantx */
+const CLI_Command_Definition_t variantxModParamCommandDefinition =
 		{ (const int8_t*) "variant", /* The command string to type. */
-				(const int8_t*) "variant:\r\n Use the command: >stream -d variant <Period> <Timeout> <Vector> <Max_Interval>.\r\n Display the value of module parameter by typing: variant.\r\n\r\n",
-				variantModParamCommand, /* The function to run. */
+				(const int8_t*) "variantx:\r\n Use the command: >stream -d variant <Period> <Timeout> <Vector> <Max_Interval>.\r\n Display the value of module parameter by typing: variantx.\r\n\r\n",
+				variantxModParamCommand, /* The function to run. */
+				0 /* No parameters are expected. */
+		};
+/*-----------------------------------------------------------*/
+/* CLI command structure : varianty */
+const CLI_Command_Definition_t variantyModParamCommandDefinition =
+		{ (const int8_t*) "variant", /* The command string to type. */
+				(const int8_t*) "varianty:\r\n Use the command: >stream -d variant <Period> <Timeout> <Vector> <Max_Interval>.\r\n Display the value of module parameter by typing: varianty.\r\n\r\n",
+				variantyModParamCommand, /* The function to run. */
+				0 /* No parameters are expected. */
+		};
+/*-----------------------------------------------------------*/
+/* CLI command structure : valuefixedx */
+const CLI_Command_Definition_t valuefixedxModParamCommandDefinition =
+		{ (const int8_t*) "valuefixed", /* The command string to type. */
+				(const int8_t*) "valuefixedx:\r\n Use the command: >stream -d valuefixed <Period> <Timeout> <Vector> <Max_Interval>.\r\n Display the value of module parameter by typing: valuefixedx.\r\n\r\n",
+				valuefixedxModParamCommand, /* The function to run. */
+				0 /* No parameters are expected. */
+		};
+/*-----------------------------------------------------------*/
+/* CLI command structure : valuefixedy */
+const CLI_Command_Definition_t valuefixedyModParamCommandDefinition =
+		{ (const int8_t*) "valuefixed", /* The command string to type. */
+				(const int8_t*) "valuefixedy:\r\n Use the command: >stream -d valuefixed <Period> <Timeout> <Vector> <Max_Interval>.\r\n Display the value of module parameter by typing: valuefixedy.\r\n\r\n",
+				valuefixedyModParamCommand, /* The function to run. */
 				0 /* No parameters are expected. */
 		};
 /*-----------------------------------------------------------*/
@@ -151,12 +200,12 @@ const CLI_Command_Definition_t streamTypeModParamCommandDefinition =
 		};
 /*-----------------------------------------------------------*/
 /* CLI command structure : stop */
-const CLI_Command_Definition_t joystickStopCommandDefinition = {
-		(const int8_t*) "stop", /* The command string to type. */
-		(const int8_t*) "stop:\r\n Stop continuous or timed measurement\r\n\r\n",
-		joystickStopCommand, /* The function to run. */
-		0 /* No parameters are expected. */
-};
+const CLI_Command_Definition_t joystickStopCommandDefinition =
+		{ (const int8_t*) "stop", /* The command string to type. */
+				(const int8_t*) "stop:\r\n Stop continuous or timed measurement\r\n\r\n",
+				joystickStopCommand, /* The function to run. */
+				0 /* No parameters are expected. */
+		};
 /*-----------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------
@@ -354,84 +403,148 @@ void Module_Init(void) {
 Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 		uint8_t dst, uint8_t shift) {
 	Module_Status result = H10R4_OK;
-	  uint32_t period = 0;
-	  uint32_t timeout = 0;
-	  bool vector = 0;
-	  int max = 0;
+	uint32_t period = 0;
+	uint32_t timeout = 0;
+	bool vector = 0;
+	int max = 0;
 
 	switch (code) {
 
 	case (CODE_H10R4_STREAM_TYPE):
-		if (cMessage[port-1][shift] == 0)
+		if (cMessage[port - 1][shift] == 0)
 			H10R4_STREAM_TYPE = 0;
 		else
 			H10R4_STREAM_TYPE = 1;
 		break;
-
 
 	case (CODE_H10R4_STOP):
 		joystickMode = REQ_STOP;
 		break;
 
 	case (CODE_H10R4_STREAM_PORT):
-			if(H10R4_STREAM_TYPE){
-				type == cartesianStream;
-			} else {
-				type == directionStream;
-			}
-		period = ( (uint32_t) cMessage[port-1][2+shift] << 24 ) + ( (uint32_t) cMessage[port-1][3+shift] << 16 ) + ( (uint32_t) cMessage[port-1][4+shift] << 8 ) + cMessage[port-1][5+shift];
-		timeout = ( (uint32_t) cMessage[port-1][6+shift] << 24 ) + ( (uint32_t) cMessage[port-1][7+shift] << 16 ) + ( (uint32_t) cMessage[port-1][8+shift] << 8 ) + cMessage[port-1][9+shift];
-		Stream_To_Port(cMessage[port-1][shift], cMessage[port-1][1+shift], period, timeout);
+		if (H10R4_STREAM_TYPE) {
+			type == cartesianStream;
+		} else {
+			type == directionStream;
+		}
+		period = ((uint32_t) cMessage[port - 1][2 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][3 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][4 + shift] << 8)
+				+ cMessage[port - 1][5 + shift];
+		timeout = ((uint32_t) cMessage[port - 1][6 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][7 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][8 + shift] << 8)
+				+ cMessage[port - 1][9 + shift];
+		Stream_To_Port(cMessage[port - 1][shift], cMessage[port - 1][1 + shift],
+				period, timeout);
 		break;
 
 	case (CODE_H10R4_STREAM_CLI):
-			if(H10R4_STREAM_TYPE){
-				type == cartesianStream;
-			} else {
-				type == directionStream;
-			}
-			period = ( (uint32_t) cMessage[port-1][shift] << 24 ) + ( (uint32_t) cMessage[port-1][1+shift] << 16 ) + ( (uint32_t) cMessage[port-1][2+shift] << 8 ) + cMessage[port-1][3+shift];
-			timeout = ( (uint32_t) cMessage[port-1][4+shift] << 24 ) + ( (uint32_t) cMessage[port-1][5+shift] << 16 ) + ( (uint32_t) cMessage[port-1][6+shift] << 8 ) + cMessage[port-1][7+shift];
-			Stream_To_CLI(period, timeout);
-			break;
-
-	case (CODE_H10R4_STREAM_RAW):
-			if(H10R4_STREAM_TYPE){
-				type == cartesianStream;
-			} else {
-				type == directionStream;
-			}
-			period = ( (uint32_t) cMessage[port-1][shift] << 24 ) + ( (uint32_t) cMessage[port-1][1+shift] << 16 ) + ( (uint32_t) cMessage[port-1][2+shift] << 8 ) + cMessage[port-1][3+shift];
-			timeout = ( (uint32_t) cMessage[port-1][4+shift] << 24 ) + ( (uint32_t) cMessage[port-1][5+shift] << 16 ) + ( (uint32_t) cMessage[port-1][6+shift] << 8 ) + cMessage[port-1][7+shift];
-			Stream_To_CLI_R(period, timeout);
-			break;
-
-	case (CODE_H10R4_STREAM_VARIANT):
-		if(H10R4_STREAM_TYPE){
+		if (H10R4_STREAM_TYPE) {
 			type == cartesianStream;
 		} else {
 			type == directionStream;
 		}
-		period = ( (uint32_t) cMessage[port-1][shift] << 24 ) + ( (uint32_t) cMessage[port-1][1+shift] << 16 ) + ( (uint32_t) cMessage[port-1][2+shift] << 8 ) + cMessage[port-1][3+shift];
-		timeout = ( (uint32_t) cMessage[port-1][4+shift] << 24 ) + ( (uint32_t) cMessage[port-1][5+shift] << 16 ) + ( (uint32_t) cMessage[port-1][6+shift] << 8 ) + cMessage[port-1][7+shift];
-		buf = ( (uint32_t) cMessage[port-1][8+shift] << 24 ) + ( (uint32_t) cMessage[port-1][9+shift] << 16 ) + ( (uint32_t) cMessage[port-1][10+shift] << 8 ) + cMessage[port-1][11+shift];
-		max = ( (uint32_t) cMessage[port-1][12+shift] << 24 ) + ( (uint32_t) cMessage[port-1][13+shift] << 16 ) + ( (uint32_t) cMessage[port-1][14+shift] << 8 ) + cMessage[port-1][15+shift];
-		vector = ((bool) cMessage[port-1][16+shift]);
-		calculateVariantValue(vector, max);
-		Stream_To_Buffer(&buf, period, timeout);
+		period = ((uint32_t) cMessage[port - 1][shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
+				+ cMessage[port - 1][3 + shift];
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
+				+ cMessage[port - 1][7 + shift];
+		Stream_To_CLI(period, timeout);
+		break;
+
+	case (CODE_H10R4_STREAM_RAW):
+		if (H10R4_STREAM_TYPE) {
+			type == cartesianStream;
+		} else {
+			type == directionStream;
+		}
+		period = ((uint32_t) cMessage[port - 1][shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
+				+ cMessage[port - 1][3 + shift];
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
+				+ cMessage[port - 1][7 + shift];
+		Stream_To_CLI_R(period, timeout);
+		break;
+
+	case (CODE_H10R4_STREAM_VARIANT):
+		if (H10R4_STREAM_TYPE) {
+			type == cartesianStream;
+		} else {
+			type == directionStream;
+		}
+
+		period = ((uint32_t) cMessage[port - 1][shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
+				+ cMessage[port - 1][3 + shift];
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
+				+ cMessage[port - 1][7 + shift];
+		max = ((uint32_t) cMessage[port - 1][12 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][13 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][14 + shift] << 8)
+				+ cMessage[port - 1][15 + shift];
+		vector = ((bool) cMessage[port - 1][16 + shift]);
+		buffer_value_lock = ((int) cMessage[port - 1][17 + shift]);
+		calculateVariantValuex(vector, max, buffer_value_lock);
+		calculateVariantValuey(vector, max, buffer_value_lock);
+		if (buffer_value_lock == 1)
+		{
+			value_fixedX = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
+				+ cMessage[port - 1][11 + shift];
+			value_fixedY = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
+				+ cMessage[port - 1][11 + shift];
+		Stream_To_Buffer_value_fixed(&value_fixedX,&value_fixedY,period, timeout);
+		}
+		else
+		{
+			bufx = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
+					+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
+					+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
+					+ cMessage[port - 1][11 + shift];
+			bufy = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
+					+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
+					+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
+					+ cMessage[port - 1][11 + shift];
+		Stream_To_Buffer(&bufx, &bufy, period, timeout);
+		}
 		break;
 
 	case (CODE_H10R4_STREAM_BUFFER):
-		if(H10R4_STREAM_TYPE){
+		if (H10R4_STREAM_TYPE) {
 			type == cartesianStream;
 		} else {
 			type == directionStream;
 		}
-		period = ( (uint32_t) cMessage[port-1][shift] << 24 ) + ( (uint32_t) cMessage[port-1][1+shift] << 16 ) + ( (uint32_t) cMessage[port-1][2+shift] << 8 ) + cMessage[port-1][3+shift];
-		timeout = ( (uint32_t) cMessage[port-1][4+shift] << 24 ) + ( (uint32_t) cMessage[port-1][5+shift] << 16 ) + ( (uint32_t) cMessage[port-1][6+shift] << 8 ) + cMessage[port-1][7+shift];
-		Cbuf1 = ( (uint32_t) cMessage[port-1][8+shift] << 24 ) + ( (uint32_t) cMessage[port-1][9+shift] << 16 ) + ( (uint32_t) cMessage[port-1][10+shift] << 8 ) + cMessage[port-1][11+shift];
-		Cbuf1 = ( (uint32_t) cMessage[port-1][12+shift] << 24 ) + ( (uint32_t) cMessage[port-1][13+shift] << 16 ) + ( (uint32_t) cMessage[port-1][14+shift] << 8 ) + cMessage[port-1][15+shift];
-		Stream_To_Cbuffer(&Cbuf1, &Cbuf1, period, timeout);
+		period =  ((uint32_t) cMessage[port - 1][shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
+				+ cMessage[port - 1][3 + shift];
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
+				+ cMessage[port - 1][7 + shift];
+		Cbuf1 = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
+				+ cMessage[port - 1][11 + shift];
+		Cbuf2 = ((uint32_t) cMessage[port - 1][12 + shift] << 24)
+				+ ((uint32_t) cMessage[port - 1][13 + shift] << 16)
+				+ ((uint32_t) cMessage[port - 1][14 + shift] << 8)
+				+ cMessage[port - 1][15 + shift];
+		Stream_To_Cbuffer(&Cbuf1, &Cbuf2, period, timeout);
 		break;
 
 	default:
@@ -440,7 +553,7 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 	}
 
 	return result;
-}
+	}
 /*-----------------------------------------------------------*/
 
 /* --- Register this module CLI Commands 
@@ -449,9 +562,13 @@ void RegisterModuleCLICommands(void) {
 	FreeRTOS_CLIRegisterCommand(&demoCommandDefinition);
 	FreeRTOS_CLIRegisterCommand(&joystickStreamCommandDefinition);
 	FreeRTOS_CLIRegisterCommand(&joystickStopCommandDefinition);
-	FreeRTOS_CLIRegisterCommand(&variantModParamCommandDefinition);
+	FreeRTOS_CLIRegisterCommand(&variantxModParamCommandDefinition);
+	FreeRTOS_CLIRegisterCommand(&variantyModParamCommandDefinition);
 	FreeRTOS_CLIRegisterCommand(&xModParamCommandDefinition);
 	FreeRTOS_CLIRegisterCommand(&yModParamCommandDefinition);
+	FreeRTOS_CLIRegisterCommand(&valuefixedxModParamCommandDefinition);
+	FreeRTOS_CLIRegisterCommand(&valuefixedyModParamCommandDefinition);
+
 }
 /*-----------------------------------------------------------*/
 
@@ -560,9 +677,18 @@ static void JoystickTask(void *argument) {
 		case REQ_STREAM_BUFFER:
 			if (type == directionStream) {
 				t0 = HAL_GetTick();
-				v = calculateVariantValue(joystickVector, joystickMaxInterval);
-				SendMeasurementResult(joystickMode, v, 0, 0, joystickModule, 0,
-						ptrBuf, NULL, NULL);
+				if(joystickVector == 0)
+				{vx = calculateVariantValuex(joystickVector, joystickMaxInterval,
+						joystickbuffer_value_lock);
+				SendMeasurementResult(joystickMode, vx, 0, 0, joystickModule, 0,
+						ptrBufx, NULL, NULL);}
+				else
+				{vy = calculateVariantValuey(joystickVector, joystickMaxInterval,
+						joystickbuffer_value_lock);
+						SendMeasurementResult(joystickMode, vy, 0, 0, joystickModule, 0,
+						ptrBufy, NULL, NULL);}
+
+
 			} else if (type == cartesianStream) {
 				cartesianCoordinates();
 				SendMeasurementResult(joystickMode, 0, x, y, joystickModule, 0,
@@ -702,8 +828,7 @@ static Module_Status SendMeasurementResult(uint8_t request, uint8_t int_value,
 			} else {
 				messageParams[0] = port;
 				messageParams[1] = (int_value);
-				SendMessageToModule(module, CODE_PORT_FORWARD,
-						2);
+				SendMessageToModule(module, CODE_PORT_FORWARD, 2);
 			}
 		} else if (type == cartesianStream) {
 
@@ -863,6 +988,62 @@ static uint32_t Adc_Calculation(int selected) {
 }
 /*-----------------------------------------------------------*/
 
+/* --- Get the Joystick direction also UP,DOWN,RIGTH,LEFT.
+ */
+static int Get_Direction4(void) {
+
+	if (buttonB) {
+		joystickMyState = BUTTON_CLICKED;
+		buttonB = 0;
+	} else {
+
+		for (int i = 0; i < 2; ++i) {
+			Adc_Calculation(i);
+		}
+		if (vector[0] >= MIN_IDLE && vector[0] <= MAX_IDLE
+				&& vector[1] >= MIN_IDLE && vector[1] <= MAX_IDLE)
+			joystickMyState = IDLE;
+
+		else {
+			diff0 = vector[0] - vector_old[0];
+			diff1 = vector[1] - vector_old[1];
+			if (diff0 > 15)
+				joystickMyState = UP;
+			    HAL_Delay(1);
+			if (diff0 < -15)
+				joystickMyState = DOWN;
+		     	HAL_Delay(1);
+			if (diff1 > 15)
+				joystickMyState = RIGHT;
+		    	HAL_Delay(1);
+			if (diff1 < -15)
+				joystickMyState = LEFT;
+		    	HAL_Delay(1);
+//			if (diff0 > 10 && diff1 > 10) {
+//				joystickState = UP_RIGHT_CORNER;
+//				HAL_Delay(1);
+//			}
+//			if (diff0 > 10 && diff1 < -10) {
+//				joystickState = UP_LEFT_CORNER;
+//				HAL_Delay(1);
+//			}
+//			if (diff0 < -10 && diff1 > 10) {
+//				joystickState = DOWN_RIGHT_CORNER;
+//				HAL_Delay(1);
+//			}
+//			if (diff0 < -10 && diff1 < -10) {
+//				joystickState = DOWN_LEFT_CORNER;
+//				HAL_Delay(1);
+//			}
+
+		vector_old[0] = vector[0];
+		vector_old[1] = vector[1];
+		}
+	}
+	return joystickMyState;
+}
+/*-----------------------------------------------------------*/
+
 /* --- Get the Joystick direction.
  */
 static int Get_Direction(void) {
@@ -911,6 +1092,9 @@ static int Get_Direction(void) {
 	}
 	return joystickState;
 }
+
+
+
 /*-----------------------------------------------------------*/
 
 /* --- Stop ADC Calculation ---*/
@@ -949,49 +1133,144 @@ static void cartesianCoordinates(void) {
 }
 /*-----------------------------------------------------------*/
 
-static int calculateVariantValue(bool vector, int maxInterval){
+static int calculateVariantValuex(bool vector, int maxInterval, int buffer_value_lock) {
+uint32_t vectorx = 0;
+uint32_t vectorup = 0;
+uint32_t vectordown = 0;
+variantB = 1;
+   	Get_Direction();
 
+	if (bufx <= maxInterval) {
+		switch (vector) {
+		case 0:
+
+				ADC_Select_CH8();
+			    HAL_ADC_Start(&hadc);
+				HAL_ADC_PollForConversion(&hadc, 1000);
+				vectorx = HAL_ADC_GetValue(&hadc);
+				HAL_ADC_Stop(&hadc);
+				ADC_Deselect_CH8();
+				vectorup = vectorx - 2000;
+				vectordown = vectorx - 2000;
+			if (joystickState == UP && bufx < maxInterval
+					&& joystickState != IDLE) {
+				bufx = (maxInterval*vectorup)/2000;
+				Delay_ms(1);
+				if (buffer_value_lock == 1) {
+					if (value_fixedX <= bufx) {
+						value_fixedX = bufx;
+						fx = bufx;
+					} else if (value_fixedX > bufx && bufx > 0) {
+						value_fixedX = bufx;
+						fx = bufx;
+					} else if (bufx == 0) {
+						value_fixedX = fx;
+					}
+				}
+			}
+			if (joystickState == DOWN && bufx > -maxInterval
+					&& joystickState != IDLE) {
+				bufx= -(-(maxInterval*vectordown)/2000);
+				Delay_ms(1);
+				if (buffer_value_lock == 1) {
+					if (value_fixedX > bufx) {
+						value_fixedX = bufx;
+						fx = bufx;
+					} else if (value_fixedx < bufx && bufx < 0) {
+						value_fixedX = bufx;
+						fx = bufx;
+					} else if (bufx == 0) {
+						value_fixedX = fx;
+					}
+				}
+			}
+			if (joystickState == IDLE) {
+				bufx = 0;
+				Delay_ms(1);
+			}
+
+			break;
+
+		case 1:
+			bufx=0;
+			break;
+		}
+		}
+	else
+		bufx = maxInterval;
+	return bufx;
+
+}
+/* -----------------------------------------------------------------------*/
+ static int calculateVariantValuey(bool vector, int maxInterval, int buffer_value_lock) {
+	 uint32_t vectory = 0;
+	 uint32_t vectorrigth = 0;
+	 uint32_t vectorleft = 0;
 	variantB = 1;
 	Get_Direction();
 
-
-	if (buf <= maxInterval) {
+	if (bufy<= maxInterval) {
 		switch (vector) {
 		case 0:
-			if (joystickState == UP && buf < maxInterval
-					&& joystickState != IDLE) {
-				buf += 1;
-				Delay_us(10);
-			}
-			if (joystickState == DOWN && buf > BASE_RANGE
-					&& joystickState != IDLE) {
-				buf -= 1;
-				Delay_us(10);
-			}
+
+			bufy=0;
 			break;
+
 		case 1:
-			if (joystickState == RIGHT && buf < maxInterval
+			ADC_Select_CH9();
+			HAL_ADC_Start(&hadc);
+			HAL_ADC_PollForConversion(&hadc, 1000);
+			vectory = HAL_ADC_GetValue(&hadc);
+			HAL_ADC_Stop(&hadc);
+			ADC_Deselect_CH9();
+			vectorrigth = vectory - 2000;
+			vectorleft = vectory - 2000;
+			if (joystickState == RIGHT && bufy < maxInterval
 					&& joystickState != IDLE) {
-				buf += 1;
-				Delay_us(10);
+				bufy = -(-(maxInterval*vectorleft)/2000);
+				Delay_ms(5);
+				if (buffer_value_lock == 1) {
+					if (value_fixedY < bufy) {
+						value_fixedY = bufy;
+						fy = bufy;
+					} else if (value_fixedY > bufy && bufy > 0) {
+						value_fixedY = bufx;
+						fy = bufy;
+					} else if (bufy == 0) {
+						value_fixedY = fy;
+					}
+				}
 			}
-			if (joystickState == LEFT && buf > BASE_RANGE
+			if (joystickState == LEFT && bufy > -maxInterval
 					&& joystickState != IDLE) {
-				buf -= 1;
-				Delay_us(10);
+				bufy = (maxInterval * vectorrigth) / 2000;
+				Delay_ms(5);
+				if (buffer_value_lock == 1) {
+					if (value_fixedY > bufy) {
+						value_fixedY = bufy;
+						fy = bufy;
+					} else if (value_fixedY < bufy && bufy < 0) {
+						value_fixedY = bufy;
+						fy = bufy;
+					} else if (bufy == 0) {
+						value_fixedY = fy;
+					}
+				}
+			}
+			if (joystickState == IDLE) {
+				bufy = 0;
+				Delay_ms(5);
 			}
 			break;
 		}
-	} else {
-
-		buf = maxInterval;
 	}
 
-	return buf;
+	else
+		bufy = maxInterval;
+	return bufy;
 
 }
-
-/* -----------------------------------------------------------------------
+/* ----------------------------------------------------------------------
  |					          APIs	 								|
  -----------------------------------------------------------------------
  */
@@ -1004,12 +1283,20 @@ Module_Status Capture_joystick_state(int *result) {
 }
 /*-----------------------------------------------------------*/
 
+Module_Status Capture_joystick_state4(int *result4) {
+	*result4 = Get_Direction4();
+	return (H10R4_OK);
+}
+/*-----------------------------------------------------------*/
+
 /* --- Get the Variant values.
  */
-Module_Status Get_variant_value(bool *vector, int *maxInterval, int *buffer) {
+Module_Status Get_variant_value(bool *vector, int *maxInterval, int *bufferx, int *buffery, int buffer_value_lock) {
 
-	*buffer = calculateVariantValue(*vector, *maxInterval);
+	*bufferx = calculateVariantValuex(*vector, *maxInterval, buffer_value_lock);
+	*buffery = calculateVariantValuey(*vector, *maxInterval, buffer_value_lock);
 	return (H10R4_OK);
+
 }
 /*-----------------------------------------------------------*/
 
@@ -1100,11 +1387,12 @@ Module_Status Stream_To_Port(uint8_t Port, uint8_t Module, uint32_t Period,
 
 /* --- stream Variant values to buffer
  */
-Module_Status Stream_To_Buffer(int *Buffer, uint32_t Period, uint32_t Timeout) {
+Module_Status Stream_To_Buffer(int *Bufferx, int *Buffery, uint32_t Period, uint32_t Timeout) {
 
 	joystickPeriod = Period;
 	joystickTimeout = Timeout;
-	ptrBuf = Buffer;
+	ptrBufx = Bufferx;
+	ptrBufy = Buffery;
 	joystickMode = REQ_STREAM_BUFFER;
 
 	if ((joystickTimeout > 0) && (joystickTimeout < 0xFFFFFFFF)) {
@@ -1121,10 +1409,34 @@ Module_Status Stream_To_Buffer(int *Buffer, uint32_t Period, uint32_t Timeout) {
 }
 
 /*-----------------------------------------------------------*/
+/* --- stream Variant values to buffer value_fixedx or value_fixedy
+ */
+Module_Status Stream_To_Buffer_value_fixed(int *value_fixedx, int *value_fixedy, uint32_t Period, uint32_t timeout) {
+
+	joystickPeriod = Period;
+	joystickTimeout = timeout;
+	ptrvaluefixedx = value_fixedx;
+	ptrvaluefixedy = value_fixedy;
+	joystickMode = REQ_STREAM_BUFFER;
+
+	if ((joystickTimeout > 0) && (joystickTimeout < 0xFFFFFFFF)) {
+		/* start software timer which will create event timeout */
+		/* Create a timeout timer */
+		xTimerJoystick = xTimerCreate("JoystickTimer",
+				pdMS_TO_TICKS(joystickTimeout), pdFALSE,
+				(void*) TIMERID_TIMEOUT_MEASUREMENT, JoystickTimerCallback);
+		/* Start the timeout timer */
+		xTimerStart(xTimerJoystick, portMAX_DELAY);
+	}
+
+	return (H10R4_OK);
+}
+/*-----------------------------------------------------------*/
 
 /* --- stream Cartesian coordinates x and y to buffer
  */
 Module_Status Stream_To_Cbuffer(float *Buffer1, float *Buffer2, uint32_t Period,
+
 		uint32_t Timeout) {
 
 	joystickPeriod = Period;
@@ -1229,7 +1541,9 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	static const int8_t *pcMessageStopMsg =
 			(int8_t*) "Streaming stopped successfully\n\r";
 	static const int8_t *pcMessageTbuffer =
-			(char*) (int8_t*) "Streaming measurements to internal buffer. Access in the CLI using module parameters: variant\n\r";
+			(char*) (int8_t*) "Streaming measurements to internal buffer. Access in the CLI using module parameters: variantx or varianty\n\r";
+	static const int8_t *pcMessageTbufferspeed =
+			(char*) (int8_t*) "Streaming measurements to internal buffer valuefixed. Access in the CLI using module parameters: valuefixedx or valuefixedy\n\r";
 	static const int8_t *pcMessageCbuffer =
 			(char*) (int8_t*) "Streaming measurements to internal buffer. Access in the CLI using module parameters: x or y\n\r";
 	int8_t *pcParameterString1;
@@ -1238,12 +1552,14 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	int8_t *pcParameterString4;
 	int8_t *pcParameterString5;
 	int8_t *pcParameterString6;
+	int8_t *pcParameterString7;
 	portBASE_TYPE xParameterStringLength1 = 0;
 	portBASE_TYPE xParameterStringLength2 = 0;
 	portBASE_TYPE xParameterStringLength3 = 0;
 	portBASE_TYPE xParameterStringLength4 = 0;
 	portBASE_TYPE xParameterStringLength5 = 0;
 	portBASE_TYPE xParameterStringLength6 = 0;
+	portBASE_TYPE xParameterStringLength7 = 0;
 
 	uint32_t Period = 0;
 	uint32_t Timeout = 0;
@@ -1278,7 +1594,9 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	/* Obtain the 6rd parameter string: Module */
 	pcParameterString6 = (int8_t*) FreeRTOS_CLIGetParameter(pcCommandString, 6,
 			&xParameterStringLength6);
-
+	/* Obtain the 7rd parameter string: speed */
+	pcParameterString7 = (int8_t*) FreeRTOS_CLIGetParameter(pcCommandString, 7,
+			&xParameterStringLength7);
 	if (NULL != pcParameterString1
 			&& !strncmp((const char*) pcParameterString1, "-d", 2)) {
 		type = directionStream;
@@ -1319,6 +1637,9 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	} else if (NULL != pcParameterString2
 			&& !strncmp((const char*) pcParameterString2, "buffer", 6)) {
 		option = buffer;
+	} else if (NULL != pcParameterString2
+			&& !strncmp((const char*) pcParameterString2, "valuefixed", 5)) {
+		option = valuefixed;
 	} else {
 
 		result = H10R4_ERR_WrongParams;
@@ -1329,53 +1650,61 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	case directionStream:
 		switch (option) {
 		case variant:
-			if(result == H10R4_OK){
-			joystickVector = atoi((char*) pcParameterString5);
-			joystickMaxInterval = atoi((char*) pcParameterString6);
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageTbuffer);
-			Stream_To_Buffer(&buf, Period, Timeout);
+			if (result == H10R4_OK) {
+				joystickVector = atoi((char*) pcParameterString5);
+				joystickMaxInterval = atoi((char*) pcParameterString6);
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageTbuffer);
+				Stream_To_Buffer(&bufx, &bufy, Period, Timeout);
 			}
 			break;
 		case raw:
-			if(result == H10R4_OK){
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
-			writePxMutex(PcPort, (char*) pcWriteBuffer,
-					strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
-			Stream_To_CLI_R(Period, Timeout);
+			if (result == H10R4_OK) {
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
+				writePxMutex(PcPort, (char*) pcWriteBuffer,
+						strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
+				Stream_To_CLI_R(Period, Timeout);
 
-			/* Wait till the end of stream */
-			while (startMeasurement != STOP_MEASUREMENT) {
-				taskYIELD();
-			}
+				/* Wait till the end of stream */
+				while (startMeasurement != STOP_MEASUREMENT) {
+					taskYIELD();
+				}
 			}
 			break;
 		case cli:
-			if(result == H10R4_OK){
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
-			writePxMutex(PcPort, (char*) pcWriteBuffer,
-					strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
-			Stream_To_CLI(Period, Timeout);
+			if (result == H10R4_OK) {
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
+				writePxMutex(PcPort, (char*) pcWriteBuffer,
+						strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
+				Stream_To_CLI(Period, Timeout);
 
-			/* Wait till the end of stream */
-			while (startMeasurement != STOP_MEASUREMENT) {
-				taskYIELD();
-			}
+				/* Wait till the end of stream */
+				while (startMeasurement != STOP_MEASUREMENT) {
+					taskYIELD();
+				}
 			}
 			break;
 		case port:
-			if(result == H10R4_OK){
-			Port = (uint8_t) atol((char*) pcParameterString5);
-			Module = (uint8_t) atol((char*) pcParameterString6);
-			if (result != (uint8_t) BOS_ERR_WrongName) {
-				sprintf((char*) pcWriteBuffer, (char*) pcMessageModule, Port,
-						Module);
-				Stream_To_Port(Port, Module, Period, Timeout);
+			if (result == H10R4_OK) {
+				Port = (uint8_t) atol((char*) pcParameterString5);
+				Module = (uint8_t) atol((char*) pcParameterString6);
+				if (result != (uint8_t) BOS_ERR_WrongName) {
+					sprintf((char*) pcWriteBuffer, (char*) pcMessageModule,
+							Port, Module);
+					Stream_To_Port(Port, Module, Period, Timeout);
 
-				// Return right away here as we don't want to block the CLI
-				return pdFALSE;
-			} else {
-				strcpy((char*) pcWriteBuffer, (char*) pcMessageWrongName);
+					// Return right away here as we don't want to block the CLI
+					return pdFALSE;
+				} else {
+					strcpy((char*) pcWriteBuffer, (char*) pcMessageWrongName);
+				}
 			}
+			break;
+		case valuefixed:
+			if (result == H10R4_OK) {
+				joystickVector = atoi((char*) pcParameterString5);
+				joystickMaxInterval = atoi((char*) pcParameterString6);
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageTbufferspeed);
+				Stream_To_Buffer_value_fixed(&value_fixedx,&value_fixedy, Period, Timeout);
 			}
 			break;
 		default:
@@ -1387,51 +1716,51 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	case cartesianStream:
 		switch (option) {
 		case buffer:
-			if(result == H10R4_OK){
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageCbuffer);
-			Stream_To_Cbuffer(&Cbuf1, &Cbuf2, Period, Timeout);
+			if (result == H10R4_OK) {
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageCbuffer);
+				Stream_To_Cbuffer(&Cbuf1, &Cbuf2, Period, Timeout);
 			}
 			break;
 		case raw:
-			if(result == H10R4_OK){
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
-			writePxMutex(PcPort, (char*) pcWriteBuffer,
-					strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
-			Stream_To_CLI_R(Period, Timeout);
+			if (result == H10R4_OK) {
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
+				writePxMutex(PcPort, (char*) pcWriteBuffer,
+						strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
+				Stream_To_CLI_R(Period, Timeout);
 
-			/* Wait till the end of stream */
-			while (startMeasurement != STOP_MEASUREMENT) {
-				taskYIELD();
-			}
+				/* Wait till the end of stream */
+				while (startMeasurement != STOP_MEASUREMENT) {
+					taskYIELD();
+				}
 			}
 			break;
 		case cli:
-			if(result == H10R4_OK){
-			strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
-			writePxMutex(PcPort, (char*) pcWriteBuffer,
-					strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
-			Stream_To_CLI(Period, Timeout);
+			if (result == H10R4_OK) {
+				strcpy((char*) pcWriteBuffer, (char*) pcMessageCLI);
+				writePxMutex(PcPort, (char*) pcWriteBuffer,
+						strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
+				Stream_To_CLI(Period, Timeout);
 
-			/* Wait till the end of stream */
-			while (startMeasurement != STOP_MEASUREMENT) {
-				taskYIELD();
-			}
+				/* Wait till the end of stream */
+				while (startMeasurement != STOP_MEASUREMENT) {
+					taskYIELD();
+				}
 			}
 			break;
 		case port:
-			if(result == H10R4_OK){
-			Port = (uint8_t) atol((char*) pcParameterString5);
-			Module = (uint8_t) atol((char*) pcParameterString6);
-			if (Module != (uint8_t) BOS_ERR_WrongName) {
-				sprintf((char*) pcWriteBuffer, (char*) pcMessageModule, Port,
-						Module);
-				Stream_To_Port(Port, Module, Period, Timeout);
+			if (result == H10R4_OK) {
+				Port = (uint8_t) atol((char*) pcParameterString5);
+				Module = (uint8_t) atol((char*) pcParameterString6);
+				if (Module != (uint8_t) BOS_ERR_WrongName) {
+					sprintf((char*) pcWriteBuffer, (char*) pcMessageModule,
+							Port, Module);
+					Stream_To_Port(Port, Module, Period, Timeout);
 
-				// Return right away here as we don't want to block the CLI
-				return pdFALSE;
-			} else {
-				strcpy((char*) pcWriteBuffer, (char*) pcMessageWrongName);
-			}
+					// Return right away here as we don't want to block the CLI
+					return pdFALSE;
+				} else {
+					strcpy((char*) pcWriteBuffer, (char*) pcMessageWrongName);
+				}
 			}
 			break;
 		default:
@@ -1444,9 +1773,8 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 	if (H10R4_ERR_WrongParams == result) {
 		strcpy((char*) pcWriteBuffer, (char*) pcMessageError);
 		writePxMutex(PcPort, (char*) pcWriteBuffer,
-						strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
+				strlen((char*) pcWriteBuffer), cmd50ms, HAL_MAX_DELAY);
 	}
-
 
 	if (stopB) {
 		strcpy((char*) pcWriteBuffer, (char*) pcMessageStopMsg);
@@ -1465,7 +1793,7 @@ static portBASE_TYPE joystickStreamCommand(int8_t *pcWriteBuffer,
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE variantModParamCommand(int8_t *pcWriteBuffer,
+static portBASE_TYPE variantxModParamCommand(int8_t *pcWriteBuffer,
 		size_t xWriteBufferLen, const int8_t *pcCommandString) {
 	static const int8_t *Msg = (int8_t*) "%d\r\n";
 
@@ -1475,12 +1803,60 @@ static portBASE_TYPE variantModParamCommand(int8_t *pcWriteBuffer,
 	(void) xWriteBufferLen;
 	configASSERT(pcWriteBuffer);
 
-	sprintf((char*) pcWriteBuffer, (char*) Msg, buf);
+	sprintf((char*) pcWriteBuffer, (char*) Msg, bufx);
 
 	/* There is no more data to return after this single string, so return pdFALSE. */
 	return pdFALSE;
 }
+/*-----------------------------------------------------------*/
 
+static portBASE_TYPE variantyModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString) {
+	static const int8_t *Msg = (int8_t*) "%d\r\n";
+
+	/* Remove compile time warnings about unused parameters, and check the
+	 write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	 write buffer length is adequate, so does not check for buffer overflows. */
+	(void) xWriteBufferLen;
+	configASSERT(pcWriteBuffer);
+
+	sprintf((char*) pcWriteBuffer, (char*) Msg, bufy);
+
+	/* There is no more data to return after this single string, so return pdFALSE. */
+	return pdFALSE;
+}
+/*-----------------------------------------------------------*/
+static portBASE_TYPE valuefixedxModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString) {
+	static const int8_t *Msg = (int8_t*) "%d\r\n";
+
+	/* Remove compile time warnings about unused parameters, and check the
+	 write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	 write buffer length is adequate, so does not check for buffer overflows. */
+	(void) xWriteBufferLen;
+	configASSERT(pcWriteBuffer);
+
+	sprintf((char*) pcWriteBuffer, (char*) Msg, value_fixedx);
+
+	/* There is no more data to return after this single string, so return pdFALSE. */
+	return pdFALSE;
+}
+/*-----------------------------------------------------------*/
+static portBASE_TYPE valuefixedyModParamCommand(int8_t *pcWriteBuffer,
+		size_t xWriteBufferLen, const int8_t *pcCommandString) {
+	static const int8_t *Msg = (int8_t*) "%d\r\n";
+
+	/* Remove compile time warnings about unused parameters, and check the
+	 write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+	 write buffer length is adequate, so does not check for buffer overflows. */
+	(void) xWriteBufferLen;
+	configASSERT(pcWriteBuffer);
+
+	sprintf((char*) pcWriteBuffer, (char*) Msg, value_fixedy);
+
+	/* There is no more data to return after this single string, so return pdFALSE. */
+	return pdFALSE;
+}
 /*-----------------------------------------------------------*/
 
 static portBASE_TYPE xModParamCommand(int8_t *pcWriteBuffer,

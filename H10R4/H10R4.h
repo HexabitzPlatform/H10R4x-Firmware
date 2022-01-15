@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
+ BitzOS (BOS) V0.2.6 - Copyright (C) 2017-2022 Hexabitz
  All rights reserved
 
  File Name     : H10R4.h
@@ -81,12 +81,12 @@
 
 /* Module-specific Definitions */
 #define NUM_MODULE_PARAMS			  4
-#define MIN_X    					  800
-#define MAX_X						  3900
-#define MIN_Y						  800
-#define MAX_Y						  3900
+#define MIN_X    					  1850
+#define MAX_X						  2150
+#define MIN_Y						  1850
+#define MAX_Y						  2200
 #define MIN_IDLE					  1900
-#define MAX_IDLE					  2100
+#define MAX_IDLE					  2150
 #define VERTICAL 					  1
 #define HORIZENTAL					  !VERTICAL
 #define BASE_RANGE					  0
@@ -113,14 +113,12 @@
 #define REQ_TIMEOUT_BUFFER			  14
 #define REQ_STOP					  15
 
-
 #define TIMERID_TIMEOUT_MEASUREMENT   0xFF
 
 /* Macros define Joystick running mode */
 #define JOYSTICK_MODE_SINGLE            0x00
 #define JOYSTICK_MODE_CONTINUOUS        0x01
 #define JOYSTICK_MODE_CONTINUOUS_TIMED  0x02
-
 
 /* Module EEPROM Variables */
 
@@ -138,7 +136,6 @@ typedef enum {
 	BUTTON_CLICKED
 } Joystick_state_t;
 
-
 typedef enum {
 	H10R4_OK = 0,
 	H10R4_ERR_UnknownMessage = 1,
@@ -150,16 +147,12 @@ typedef enum {
 } Module_Status;
 
 typedef enum {
-	directionStream,
-	cartesianStream
+	directionStream, cartesianStream
 } Stream_type_t;
 
 typedef enum {
-	variant,
-	raw,
-	cli,
-	port,
-	buffer,
+	variant, raw, cli, port, buffer, valuefixed,
+
 } Stream_options_t;
 
 /* Indicator LED */
@@ -191,28 +184,30 @@ extern void SystemClock_Config(void);
 
 extern TIM_HandleTypeDef htim3;
 
-
 /* -----------------------------------------------------------------------
  |		        		    	APIs	 							|									 	|
  -----------------------------------------------------------------------
  */
 
 extern Module_Status Capture_joystick_state(int *result);
-extern Module_Status Get_variant_value(bool *vector, int *maxInterval, int *buffer);
+extern Module_Status Capture_joystick_state4(int *result4);
+extern Module_Status Get_variant_value(bool *vector, int *maxInterval, int *bufferx, int *buffery, int buffer_value_lock);
 extern Module_Status Stop_Joystick(void);
-extern Module_Status Stream_To_Buffer(int *Buffer, uint32_t Period, uint32_t Timeout);
-extern Module_Status Stream_To_Cbuffer(float *Buffer1, float *Buffer2, uint32_t Period, uint32_t Timeout);
+extern Module_Status Stream_To_Buffer(int *Bufferx, int *Buffery, uint32_t Period,
+		uint32_t Timeout);
+extern Module_Status Stream_To_Cbuffer(float *Buffer1, float *Buffer2,
+		uint32_t Period, uint32_t Timeout);
+extern Module_Status Stream_To_Buffer_value_fixed(int *value_fixedx, int *value_fixedy, uint32_t Period,
+		uint32_t Timeout);
 extern Module_Status Stream_To_CLI(uint32_t Period, uint32_t Timeout);
 extern Module_Status Stream_To_CLI_R(uint32_t Period, uint32_t Timeout);
-extern Module_Status Stream_To_Port(uint8_t Port, uint8_t Module, uint32_t Period, uint32_t Timeout);
-
-
+extern Module_Status Stream_To_Port(uint8_t Port, uint8_t Module,
+		uint32_t Period, uint32_t Timeout);
 
 /* -----------------------------------------------------------------------
  |			    			 Commands								|								 	|
  -----------------------------------------------------------------------
  */
-
 
 #endif /* H10R4_H */
 
