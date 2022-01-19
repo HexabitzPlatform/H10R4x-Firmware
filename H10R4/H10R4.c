@@ -371,7 +371,7 @@ uint8_t ClearROtopology(void) {
 
 /* --- H10R4 module initialization ---
  */
-void Module_Init(void) {
+void Module_Peripheral_Init(void) {
 
 	/* GPIO init */
 	MX_GPIO_Init();
@@ -385,7 +385,7 @@ void Module_Init(void) {
 
 	/* ADC init */
 	MX_ADC_Init();
-
+	ADC_Channel_config();
 	/* Create a timeout timer */
 	xTimerJoystick = xTimerCreate("JoystickTimer", pdMS_TO_TICKS(1000), pdFALSE,
 			(void*) 1, JoystickTimerCallback);
@@ -618,6 +618,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 static void JoystickTask(void *argument) {
 	uint32_t t0 = 0;
 	while (1) {
+
 		switch (joystickMode) {
 
 		case REQ_STREAM_CLI:
