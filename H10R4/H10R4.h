@@ -17,7 +17,8 @@
 #include "H10R4_gpio.h"
 #include "H10R4_dma.h"
 #include "H10R4_adc.h"
-
+#include "H10R4_inputs.h"
+#include "H10R4_eeprom.h"
 /* Exported definitions -------------------------------------------------------*/
 #ifdef H10R4
 #define	modulePN		_H10R4
@@ -203,7 +204,8 @@ extern Module_Status Stream_To_CLI(uint32_t Period, uint32_t Timeout);
 extern Module_Status Stream_To_CLI_R(uint32_t Period, uint32_t Timeout);
 extern Module_Status Stream_To_Port(uint8_t Port, uint8_t Module,
 		uint32_t Period, uint32_t Timeout);
-
+void SetupPortForRemoteBootloaderUpdate(uint8_t port);
+void remoteBootloaderUpdate(uint8_t src,uint8_t dst,uint8_t inport,uint8_t outport);
 /* -----------------------------------------------------------------------
  |			    			 Commands								|								 	|
  -----------------------------------------------------------------------

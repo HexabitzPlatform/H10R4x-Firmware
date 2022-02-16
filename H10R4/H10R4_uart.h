@@ -48,6 +48,7 @@ extern HAL_StatusTypeDef writePxITMutex(uint8_t port, char *buffer, uint16_t n,
 		uint32_t mutexTimeout);
 extern HAL_StatusTypeDef writePxDMAMutex(uint8_t port, char *buffer, uint16_t n,
 		uint32_t mutexTimeout);
+extern BOS_Status ReadPortsDirMSG(uint8_t SourceModule);
 
 #ifdef __cplusplus
 }
