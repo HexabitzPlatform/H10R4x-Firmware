@@ -8,6 +8,8 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "BOS.h"
+uint8_t temp_length[NumOfPorts] = {0};
+uint8_t temp_index[NumOfPorts] = {0};
 
 /* Private variables ---------------------------------------------------------*/
 Stream_type_t type;
