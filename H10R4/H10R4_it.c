@@ -10,8 +10,8 @@
 #include "BOS.h"
 
 /* Private variables ---------------------------------------------------------*/
-Stream_type_t type;
-volatile uint8_t joystickMode;
+//Stream_type_t type;
+//volatile uint8_t joystickMode;
 
 /* External variables --------------------------------------------------------*/
 extern uint8_t UARTRxBuf[NumOfPorts][MSG_RX_BUF_SIZE];

@@ -15,7 +15,7 @@
 
 /* USER CODE END 0 */
 
-ADC_HandleTypeDef hadc;
+
 
 /* ADC init GPIO function */
 

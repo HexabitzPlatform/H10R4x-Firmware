@@ -162,6 +162,10 @@ typedef enum {
 #define _IND_LED_PIN		GPIO_PIN_11
 #endif
 
+
+extern Stream_type_t type;
+extern volatile uint8_t joystickMode;
+
 /* Export GPIO variables */
 extern void MX_GPIO_Init(void);
 
