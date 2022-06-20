@@ -492,14 +492,14 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 		} else {
 			type == directionStream;
 		}
-		period = ((uint32_t) cMessage[port - 1][2 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][3 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][4 + shift] << 8)
-				+ cMessage[port - 1][5 + shift];
-		timeout = ((uint32_t) cMessage[port - 1][6 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][7 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][8 + shift] << 8)
-				+ cMessage[port - 1][9 + shift];
+		period = ((uint32_t) cMessage[port - 1][2 + shift] )
+				+ ((uint32_t) cMessage[port - 1][3 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][4 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][5 + shift] <<24);
+		timeout = ((uint32_t) cMessage[port - 1][6 + shift] )
+				+ ((uint32_t) cMessage[port - 1][7 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][8 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][9 + shift] <<24);
 		Stream_To_Port(cMessage[port - 1][shift], cMessage[port - 1][1 + shift],
 				period, timeout);
 		break;
@@ -510,14 +510,14 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 		} else {
 			type == directionStream;
 		}
-		period = ((uint32_t) cMessage[port - 1][shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
-				+ cMessage[port - 1][3 + shift];
-		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
-				+ cMessage[port - 1][7 + shift];
+		period = ((uint32_t) cMessage[port - 1][shift] )
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][3 + shift] <<24);
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] )
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][7 + shift] <<24);
 		Stream_To_CLI(period, timeout);
 		break;
 
@@ -527,14 +527,14 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 		} else {
 			type == directionStream;
 		}
-		period = ((uint32_t) cMessage[port - 1][shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
-				+ cMessage[port - 1][3 + shift];
-		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
-				+ cMessage[port - 1][7 + shift];
+		period = ((uint32_t) cMessage[port - 1][shift] )
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][3 + shift] <<24);
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] )
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][7 + shift] <<24);
 		Stream_To_CLI_R(period, timeout);
 		break;
 
@@ -545,44 +545,32 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 			type == directionStream;
 		}
 
-		period = ((uint32_t) cMessage[port - 1][shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
-				+ cMessage[port - 1][3 + shift];
-		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
-				+ cMessage[port - 1][7 + shift];
-		max = ((uint32_t) cMessage[port - 1][12 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][13 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][14 + shift] << 8)
-				+ cMessage[port - 1][15 + shift];
-		vector = ((bool) cMessage[port - 1][16 + shift]);
-		buffer_value_lock = ((int) cMessage[port - 1][17 + shift]);
+		period = ((uint32_t) cMessage[port - 1][shift] )
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][3 + shift] <<24);
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] )
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][7 + shift] <<24);
+		max = ((uint32_t) cMessage[port - 1][8 + shift] )
+				+ ((uint32_t) cMessage[port - 1][9 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][10 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][11 + shift] <<24);
+		vector = ((bool) cMessage[port - 1][12 + shift]);
+		buffer_value_lock = ((int) cMessage[port - 1][13 + shift]);
 		calculateVariantValuex(vector, max, buffer_value_lock);
 		calculateVariantValuey(vector, max, buffer_value_lock);
 		if (buffer_value_lock == 1)
 		{
-			value_fixedX = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
-				+ cMessage[port - 1][11 + shift];
-			value_fixedY = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
-				+ cMessage[port - 1][11 + shift];
+			value_fixedX = max;
+			value_fixedY = max;
 		Stream_To_Buffer_value_fixed(&value_fixedX,&value_fixedY,period, timeout);
 		}
 		else
 		{
-			bufx = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
-					+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
-					+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
-					+ cMessage[port - 1][11 + shift];
-			bufy = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
-					+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
-					+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
-					+ cMessage[port - 1][11 + shift];
+			bufx = max;
+			bufy = max;
 		Stream_To_Buffer(&bufx, &bufy, period, timeout);
 		}
 		break;
@@ -593,22 +581,22 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 		} else {
 			type == directionStream;
 		}
-		period =  ((uint32_t) cMessage[port - 1][shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][1 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][2 + shift] << 8)
-				+ cMessage[port - 1][3 + shift];
-		timeout = ((uint32_t) cMessage[port - 1][4 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][5 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][6 + shift] << 8)
-				+ cMessage[port - 1][7 + shift];
-		Cbuf1 = ((uint32_t) cMessage[port - 1][8 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][9 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][10 + shift] << 8)
-				+ cMessage[port - 1][11 + shift];
-		Cbuf2 = ((uint32_t) cMessage[port - 1][12 + shift] << 24)
-				+ ((uint32_t) cMessage[port - 1][13 + shift] << 16)
-				+ ((uint32_t) cMessage[port - 1][14 + shift] << 8)
-				+ cMessage[port - 1][15 + shift];
+		period =  ((uint32_t) cMessage[port - 1][shift] )
+				+ ((uint32_t) cMessage[port - 1][1 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][2 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][3 + shift]<<24);
+		timeout = ((uint32_t) cMessage[port - 1][4 + shift] )
+				+ ((uint32_t) cMessage[port - 1][5 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][6 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][7 + shift] <<24);
+		Cbuf1 = ((uint32_t) cMessage[port - 1][8 + shift] )
+				+ ((uint32_t) cMessage[port - 1][9 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][10 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][11 + shift]<<24);
+		Cbuf2 = ((uint32_t) cMessage[port - 1][12 + shift] )
+				+ ((uint32_t) cMessage[port - 1][13 + shift] << 8)
+				+ ((uint32_t) cMessage[port - 1][14 + shift] << 16)
+				+ ((uint32_t)cMessage[port - 1][15 + shift] <<24);
 		Stream_To_Cbuffer(&Cbuf1, &Cbuf2, period, timeout);
 		break;
 
@@ -620,6 +608,7 @@ Module_Status Module_MessagingTask(uint16_t code, uint8_t port, uint8_t src,
 	return result;
 	}
 /*-----------------------------------------------------------*/
+
 
 /* --- Register this module CLI Commands 
  */
