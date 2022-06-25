@@ -1,5 +1,5 @@
 /*
- BitzOS (BOS) V0.2.6 - Copyright (C) 2017-2022 Hexabitz
+ BitzOS (BOS) V0.2.7 - Copyright (C) 2017-2022 Hexabitz
  All rights reserved
 
  File Name     : H10R4.h
@@ -161,6 +161,10 @@ typedef enum {
 #define _IND_LED_PORT		GPIOA
 #define _IND_LED_PIN		GPIO_PIN_11
 #endif
+
+
+extern Stream_type_t type;
+extern volatile uint8_t joystickMode;
 
 /* Export GPIO variables */
 extern void MX_GPIO_Init(void);
